@@ -1,0 +1,7 @@
+bin
+obj
+SDL2.dll
+SDL2_net.dll
+shockd.cbp
+shockd.depend
+shockd.layout
