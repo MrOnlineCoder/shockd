@@ -5,12 +5,9 @@
 
 void shock_serve_file(TCPsocket sock, char* filename)
 {
-    char buf[4 * 1024];
-
-    FILE* fid = NULL;
-    fid = fopen(filename, "r");
-
-    if (fid == NULL) {
+    long fsize;
+    FILE *fp = fopen(filename, "rb");
+    if (!fp){
         printf("Internal Server Error: file %s cannot be opened! \n", filename);
         shock_error_internal(sock, "Requested file cannot be opened");
         return;
@@ -18,12 +15,22 @@ void shock_serve_file(TCPsocket sock, char* filename)
 
     shock_send_responseline(sock, 200, "OK", 1);
     shock_default_headers(sock);
-    fgets(buf, sizeof(buf), fid);
-    while (!feof(fid))
-    {
-        SDLNet_TCP_Send(sock, buf, strlen(buf));
-        fgets(buf, sizeof(buf), fid);
+    long buflen;
+    char buf[2048];
+    while (1) {
+        buflen = fread(buf, 1, sizeof(buf), fp);
+        if (buflen < 1) {
+            if (!feof(fp)) {
+                printf("Internal Server Error: An error occured while reading file: %s \n", filename);
+                shock_error_internal(sock, "Failed to read data from requested file!");
+                break;
+            }
+            break;
+        }
+        SDLNet_TCP_Send(sock, buf, buflen);
     }
+    fclose(fp);
+    free(buf);
 }
 
 

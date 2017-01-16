@@ -72,7 +72,13 @@ int main(int argc, char* argv[]) {
 			SDL_Delay(100);
 			continue;
 		}
-        processRequest(client);
+		SDL_Thread* thread;
+        thread = SDL_CreateThread(processRequest, "ClientProcessThread", client);
+
+        if (thread == NULL) {
+            printf("SERVER ERROR: Failed to create SDL_Thread for new connection. Making sync call...");
+            processRequest(client);
+        }
     }
 
     printf("CLEANUP: cleaning SDLnet up\n");
