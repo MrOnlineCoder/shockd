@@ -5,6 +5,7 @@
 #include "response.h"
 #include "error.h"
 #include "server_defines.h"
+#include "config_file.h"
 
 void processRequest(TCPsocket sock) {
     char buffer[2048];
@@ -46,7 +47,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+
     IPaddress ip;
+    shock_config_t conf;
+    shock_default_config(&conf);
+    printf("Config port: %d\n", conf.port);
+    shock_parse_config(&conf, "shockd.conf");
 
     printf("INIT: resolving localhost:3000 address..\n");
     if(SDLNet_ResolveHost(&ip, NULL, 3000) == -1) {
