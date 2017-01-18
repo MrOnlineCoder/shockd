@@ -7,6 +7,8 @@
 #include "server_defines.h"
 #include "config_file.h"
 
+shock_config_t conf;
+
 void processRequest(TCPsocket sock) {
     char buffer[2048];
     SDLNet_TCP_Recv(sock, &buffer, sizeof(buffer));
@@ -25,7 +27,7 @@ void processRequest(TCPsocket sock) {
         strcat(route, "index.html");
     }
     char filename[FILENAME_MAX] = "";
-    sprintf(filename, "%s%s", HTDOCS_FOLDER, route);
+    sprintf(filename, "%s%s", conf.root, route);
 
     shock_serve_file(sock, filename);
 
@@ -33,44 +35,52 @@ void processRequest(TCPsocket sock) {
 }
 
 int main(int argc, char* argv[]) {
-    printf("shockd server by MrOnlineCoder\n");
-    printf("INIT: calling SDL_Init()\n");
+    printf("*** shockd server by MrOnlineCoder ***\n");
+    printf("Initializing...\n\n");
     if(SDL_Init(0)==-1) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
-        printf("ERROR: exiting...\n");
+        printf("[Error] exiting...\n");
         return 1;
     }
-    printf("INIT: calling SDLnet_Init()\n");
     if(SDLNet_Init()==-1) {
         printf("SDLnet_Init error: %s\n", SDLNet_GetError());
-        printf("ERROR: exiting...\n");
+        printf("[Error] exiting...\n");
         return 1;
     }
 
 
     IPaddress ip;
-    shock_config_t conf;
-    shock_default_config(&conf);
-    printf("Config port: %d\n", conf.port);
-    shock_parse_config(&conf, "shockd.conf");
 
-    printf("INIT: resolving localhost:3000 address..\n");
-    if(SDLNet_ResolveHost(&ip, NULL, 3000) == -1) {
+    printf("Applying configuration from shockd.conf file...\n\n");
+    shock_config_t config;
+    shock_default_config(&config);
+    if (shock_parse_config(&config, "shockd.conf") == -1) {
+        printf("FATAL ERROR: cannot parse config...");
+        return 1;
+    }
+    conf = config;
+    printf("[Config] Port: %d\n", conf.port);
+    printf("[Config] Server Root: %s\n", conf.root);
+    printf("[Config] ClearLogs: %d\n", conf.clearLogs);
+
+
+    printf("\nResolving IP...\n\n");
+    if(SDLNet_ResolveHost(&ip, NULL, conf.port) == -1) {
         printf("SDLnet_ResolveHost error: %s\n", SDLNet_GetError());
-        printf("ERROR: exiting...\n");
+        printf("[Error] exiting...\n");
         return 1;
     }
 
-    printf("INIT: starting server....\n");
+    printf("Starting server...\n\n");
     TCPsocket server = SDLNet_TCP_Open(&ip);
     if (server == NULL) {
         printf("SDLnet_TCP_Open error: %s\n", SDLNet_GetError());
-        printf("ERROR: exiting...\n");
+        printf("[Error] exiting...\n");
         return 1;
     }
     TCPsocket client;
 
-    printf("SERVER: Loading complete! Now waiting for incoming connections...\n");
+    printf("[!] Done. Waiting for incoming connections...\n");
     while (1) {
         client=SDLNet_TCP_Accept(server);
 		if(!client)
@@ -82,7 +92,7 @@ int main(int argc, char* argv[]) {
         thread = SDL_CreateThread(processRequest, "ClientProcessThread", client);
 
         if (thread == NULL) {
-            printf("SERVER ERROR: Failed to create SDL_Thread for new connection. Making sync call...");
+            printf("[Error] Failed to create SDL_Thread for new connection. Making sync call...");
             processRequest(client);
         }
     }

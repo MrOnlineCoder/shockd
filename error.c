@@ -15,6 +15,8 @@ int shock_error_respone(TCPsocket sock, int errorCode, char* errorStatus, char* 
     SDLNet_TCP_Send(sock, buf, strlen(buf));
     sprintf(buf, "\r\n");
     SDLNet_TCP_Send(sock, buf, strlen(buf));
+    sprintf(buf, "<title>%s</title>", errorStatus);
+    SDLNet_TCP_Send(sock, buf, strlen(buf));
     sprintf(buf, "<h1>Error %i %s</h1>\r\n", errorCode, errorStatus);
     SDLNet_TCP_Send(sock, buf, strlen(buf));
     sprintf(buf, "<p>%s</p>\r\n", errorMsg);
@@ -41,5 +43,12 @@ int shock_error_internal(TCPsocket sock, char* msg)
     shock_error_respone(sock, 500, "Internal Server Error", msg);
     return 0;
 }
+
+int shock_error_notfound(TCPsocket sock, char* msg)
+{
+    shock_error_respone(sock, 404, "Not Found", msg);
+    return 0;
+}
+
 
 

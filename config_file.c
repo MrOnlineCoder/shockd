@@ -1,12 +1,13 @@
 #include "config_file.h"
 #include "stdio.h"
+#include "stdlib.h"
 
 int shock_parse_config(shock_config_t* conf, char* filename)
 {
     FILE *fp = fopen(filename, "r");
     if (!fp){
         printf("-------------------------------------------\n");
-        printf("ERROR: Cannot open config file for reading!\n");
+        printf("[Error] Cannot open config file for reading!\n");
         printf("-------------------------------------------\n");
         return -1;
     }
@@ -19,7 +20,7 @@ int shock_parse_config(shock_config_t* conf, char* filename)
     while (fgets (line, sizeof(line), fp ) != NULL ) {
         //Okay, so let's parse
 
-        //If line is comment, skip it
+        //If line is comment or empty line, skip it
         if (line[0] == '#' || line[0] == '\n') {
             lineNum++;
             continue;
@@ -65,6 +66,7 @@ int shock_parse_config(shock_config_t* conf, char* filename)
         }
 
         lineNum++;
+        shock_parse_config_token(conf, entry);
     }
 
     return 0;
@@ -75,4 +77,38 @@ void shock_default_config(shock_config_t* conf)
     conf->port = SHOCK_DEFAULT_PORT;
     conf->clearLogs = SHOCK_DEAFULT_CLEARLOGS;
     strcpy(conf->root, SHOCK_DEFAULT_ROOT);
+}
+
+
+int shock_parse_config_token(shock_config_t* conf, shock_config_keypair_t entry)
+{
+    // OK, so you noticed this bad hardcoded IFs
+    // But sorry so :)
+
+    if (strcasecmp(entry.name, "Port") == 0) {
+        conf->port = strtol(entry.val, NULL, 10);
+        if (conf->port == 0) {
+            conf->port = SHOCK_DEFAULT_PORT;
+            printf("Config Error: Invalid value for %s option. \n", entry.name);
+        }
+        return;
+    }
+
+    if (strcasecmp(entry.name, "ServerRoot") == 0) {
+        strncpy(conf->root, entry.val, sizeof(conf->root));
+        return;
+    }
+
+    if (strcasecmp(entry.name, "ClearLogs") == 0) {
+        if(entry.val[0] == '1') {
+            conf->clearLogs = 1;
+        } else if(entry.val[0] == '0') {
+            conf->clearLogs = 0;
+        } else {
+            printf("Config Error: Invalid value for %s option. \n", entry.name);
+        }
+        return;
+    }
+
+    printf("Config Error: Unknown option %s\n", entry.name);
 }

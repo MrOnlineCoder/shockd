@@ -8,8 +8,7 @@ void shock_serve_file(TCPsocket sock, char* filename)
     long fsize;
     FILE *fp = fopen(filename, "rb");
     if (!fp){
-        printf("Internal Server Error: file %s cannot be opened! \n", filename);
-        shock_error_internal(sock, "Requested file cannot be opened");
+        shock_error_notfound(sock, "Requested file cannot be found.");
         return;
     }
 

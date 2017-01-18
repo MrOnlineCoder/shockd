@@ -1,8 +1,6 @@
 #ifndef SHOCK_DEFINES_H
 #define SHOCK_DEFINES_H
 
-#define SERVER_STRING "ShockDaemon/0.7"
-#define SERVER_FOLDER "serverdocs"
-#define HTDOCS_FOLDER "htdocs"
+#define SERVER_STRING "ShockDaemon/0.8.1"
 
 #endif // SHOCK_DEFINES_H
