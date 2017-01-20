@@ -1,9 +1,11 @@
 #include "response.h"
 #include "server_defines.h"
-#include <SDL2/SDL_net.h>
+//#include <SDL2/SDL_net.h>
 #include <stdio.h>
 
-void shock_serve_file(TCPsocket sock, char* filename)
+#include "base.h"
+
+void shock_serve_file(SOCKET sock, char* filename)
 {
     long fsize;
     FILE *fp = fopen(filename, "rb");
@@ -26,28 +28,31 @@ void shock_serve_file(TCPsocket sock, char* filename)
             }
             break;
         }
-        SDLNet_TCP_Send(sock, buf, buflen);
+        send(sock, buf, buflen, 0);
     }
     fclose(fp);
     free(buf);
 }
 
 
-void shock_default_headers(TCPsocket sock)
+void shock_default_headers(SOCKET sock)
 {
     char buf[1024];
     sprintf(buf, "Server: %s\r\n", SERVER_STRING);
-    SDLNet_TCP_Send(sock, buf, strlen(buf));
+    //SDLNet_TCP_Send(sock, buf, strlen(buf));
+    send(sock, buf, strlen(buf), 0);
     //sprintf(buf, "Content-Type: text/html\r\n");
     //SDLNet_TCP_Send(sock, buf, strlen(buf));
     sprintf(buf, "\r\n"); // DO NOT DELETE! This seperates the body and headers so!
-    SDLNet_TCP_Send(sock, buf, strlen(buf));
+    //SDLNet_TCP_Send(sock, buf, strlen(buf));
+    send(sock, buf, strlen(buf), 0);
 }
 
 
-void shock_send_responseline(TCPsocket sock, int status, char* statusMsg, int httpVer)
+void shock_send_responseline(SOCKET sock, int status, char* statusMsg, int httpVer)
 {
     char buf[1024];
     sprintf(buf, "HTTP/1.%d %d %s\r\n", httpVer, status, statusMsg);
-    SDLNet_TCP_Send(sock, buf, strlen(buf));
+    //SDLNet_TCP_Send(sock, buf, strlen(buf));
+    send(sock, buf, strlen(buf), 0);
 }
