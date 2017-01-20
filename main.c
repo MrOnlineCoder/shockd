@@ -40,11 +40,14 @@ int main(int argc, char* argv[]) {
     if(SDL_Init(0)==-1) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
         printf("[Error] exiting...\n");
+        printf("Press Enter to exit\n");
+        getchar();
         return 1;
     }
     if(SDLNet_Init()==-1) {
         printf("SDLnet_Init error: %s\n", SDLNet_GetError());
         printf("[Error] exiting...\n");
+        SDL_Delay(ERROR_DELAY);
         return 1;
     }
 
@@ -55,7 +58,8 @@ int main(int argc, char* argv[]) {
     shock_config_t config;
     shock_default_config(&config);
     if (shock_parse_config(&config, "shockd.conf") == -1) {
-        printf("FATAL ERROR: cannot parse config...");
+        printf("FATAL ERROR: cannot parse config!");
+        SDL_Delay(ERROR_DELAY);
         return 1;
     }
     conf = config;
@@ -68,6 +72,7 @@ int main(int argc, char* argv[]) {
     if(SDLNet_ResolveHost(&ip, NULL, conf.port) == -1) {
         printf("SDLnet_ResolveHost error: %s\n", SDLNet_GetError());
         printf("[Error] exiting...\n");
+        SDL_Delay(ERROR_DELAY);
         return 1;
     }
 
@@ -76,8 +81,11 @@ int main(int argc, char* argv[]) {
     if (server == NULL) {
         printf("SDLnet_TCP_Open error: %s\n", SDLNet_GetError());
         printf("[Error] exiting...\n");
+        SDL_Delay(ERROR_DELAY);
         return 1;
     }
+
+
     TCPsocket client;
 
     printf("[!] Done. Waiting for incoming connections...\n");
@@ -85,7 +93,7 @@ int main(int argc, char* argv[]) {
         client=SDLNet_TCP_Accept(server);
 		if(!client)
 		{
-			SDL_Delay(100);
+		    SDL_Delay(10);
 			continue;
 		}
 		SDL_Thread* thread;

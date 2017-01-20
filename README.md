@@ -11,19 +11,21 @@ Features
 
 * Multi-threading (every new connection is processed in new thread)
 
-* It is fast enough for home usage :D
+* It is fast enough for home usage :D (but not as nginx for example)
 
 Config
 -----
 
-There is no config currently (but will be added soon), just run the executable. Note, that htdocs folder must be present in executable directory.
+You can configure server by editing options in **shockd.conf** file.
+
+Check default config, it has explanation in comments.
 
 TODO
 ----
 
 * Add keep-alive support
 
-* Implement config parser and use it
+* ~~Implement config parser and use it~~
 
 * POST body parser
 
