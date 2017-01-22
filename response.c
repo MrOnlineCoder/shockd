@@ -30,7 +30,6 @@ void shock_serve_file(SOCKET sock, char* filename)
         send(sock, buf, buflen, 0);
     }
     fclose(fp);
-    free(buf);
 }
 
 

@@ -13,6 +13,24 @@ Features
 
 * It is fast enough for home usage :D (but not as nginx for example)
 
+Building
+--------
+shockd supports Windows and Unix based systems with sockets and pthread support.
+
+1.Get source code by downloading archive or by **git clone**
+
+2.Build for your platform using make:
+
+For Windows:
+```
+make win32
+```
+
+For Linux: 
+```
+make linux
+```
+
 Config
 -----
 
@@ -22,6 +40,8 @@ Check default config, it has explanation in comments.
 
 TODO
 ----
+
+* Add CGI support
 
 * Add keep-alive support
 
