@@ -32,7 +32,6 @@ int shock_error_respone(SOCKET sock, int errorCode, char* errorStatus, char* err
 
 int shock_error_badrequest(SOCKET sock, shock_request_t* req)
 {
-    //printf("Error msg: %s \n", req->errorMsg);
     shock_error_respone(sock, 401, "Bad Request", req->errorMsg);
     return 0;
 }

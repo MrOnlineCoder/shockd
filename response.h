@@ -3,7 +3,6 @@
 
 #include "base.h"
 
-//#include <SDL2/SDL_net.h>
 
 /*
     We don't have struct that represents response like shock_response_t, because response is created and sent usually with 1 function.

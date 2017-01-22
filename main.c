@@ -1,11 +1,10 @@
-#include <SDL.h>
 #include <stdio.h>
-//#include <SDL2/SDL_net.h>
 #include "request.h"
 #include "response.h"
 #include "error.h"
 #include "server_defines.h"
 #include "config_file.h"
+#include "thread_wrapper.h"
 
 #include "base.h"
 
@@ -13,7 +12,6 @@ shock_config_t conf;
 
 void processRequest(SOCKET sock) {
     char buffer[2048];
-    //SDLNet_TCP_Recv(sock, &buffer, sizeof(buffer));
     recv(sock, &buffer, sizeof(buffer), 0);
     shock_request_t request;
     //Parse and validate request
@@ -34,7 +32,6 @@ void processRequest(SOCKET sock) {
 
     shock_serve_file(sock, filename);
 
-    //SDLNet_TCP_Close(sock);
     closesocket(sock);
 }
 
@@ -53,20 +50,6 @@ int initSockets() {
 int main(int argc, char* argv[]) {
     printf("*** shockd server by MrOnlineCoder ***\n");
     printf("Initializing...\n\n");
-    if(SDL_Init(0)==-1) {
-        printf("SDL_Init Error: %s\n", SDL_GetError());
-        printf("[Error] exiting...\n");
-        printf("Press Enter to exit\n");
-        getchar();
-        return 1;
-    }
-    /*
-    if(SDLNet_Init()==-1) {
-        printf("SDLnet_Init error: %s\n", SDLNet_GetError());
-        printf("[Error] exiting...\n");
-        SDL_Delay(ERROR_DELAY);
-        return 1;
-    }*/
 
     if (initSockets() == -1) {
         printf("[Fatal Error] Cannot init Winsock!\n");
@@ -81,7 +64,6 @@ int main(int argc, char* argv[]) {
     shock_default_config(&config);
     if (shock_parse_config(&config, "shockd.conf") == -1) {
         printf("[Fatal Error] cannot parse config!");
-        //SDL_Delay(ERROR_DELAY);
         return 1;
     }
     conf = config;
@@ -113,21 +95,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    /*if(SDLNet_ResolveHost(&ip, NULL, conf.port) == -1) {
-        printf("SDLnet_ResolveHost error: %s\n", SDLNet_GetError());
-        printf("[Error] exiting...\n");
-        SDL_Delay(ERROR_DELAY);
-        return 1;
-    }*/
-
     printf("Starting server...\n\n");
-    /*TCPsocket server = SDLNet_TCP_Open(&ip);
-    if (server == NULL) {
-        printf("SDLnet_TCP_Open error: %s\n", SDLNet_GetError());
-        printf("[Error] exiting...\n");
-        SDL_Delay(ERROR_DELAY);
-        return 1;
-    }*/
 
     if (listen(server, 5) == SOCKET_ERROR) {
         printf("[Fatal Error] Cannot start listening on given port! \n");
@@ -135,33 +103,22 @@ int main(int argc, char* argv[]) {
     }
 
 
-    //TCPsocket client;
     SOCKET client;
     struct sockaddr_in clientIP;
     size_t c = sizeof(struct sockaddr_in);
 
     printf("[!] Done. Waiting for incoming connections...\n");
     while (1) {
-        //client=SDLNet_TCP_Accept(server);
         client=accept(server, (struct sockaddr *)&clientIP, (socklen_t*)&c);
 		if(client < 0)
 		{
 		    printf("[Connection Error] Failed to accept incoming connection!");
 			continue;
 		}
-		SDL_Thread* thread;
-        thread = SDL_CreateThread(processRequest, "ClientProcessThread", client);
 
-        if (thread == NULL) {
-            printf("[Error] Failed to create SDL_Thread for new connection. Making sync call...");
-            processRequest(client);
-        }
+        shock_create_thread(processRequest, client);
     }
 
-    //printf("CLEANUP: cleaning SDLnet up\n");
-    //SDLNet_Quit();
-    printf("CLEANUP: cleaning SDL up\n");
-    SDL_Quit();
     printf("--- END ---");
     return 0;
 }
