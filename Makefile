@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-std=c99 -o shockd -w
 
 WIN32_LIBS=-lws2_32
-LINUX_LIBS=-pthread
+LINUX_LIBS=-pthread -lsocket
 
 SRC=main.c request.c response.c error.c config_file.c
 
