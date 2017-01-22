@@ -16,9 +16,8 @@ typedef int socklen_t;
 #define INADDR_NONE     0xFFFFFFFF
 #define SOCKET_ERROR	(-1)
 #define closesocket     soclose
-#define SOCKET  int
 #define INVALID_SOCKET  -1
-typedef unsigned int SOCKET;
+#define SOCKET int
 
 #include <sys/socket.h>
 
