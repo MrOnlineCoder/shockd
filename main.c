@@ -5,13 +5,46 @@
 #include "server_defines.h"
 #include "config_file.h"
 #include "thread_wrapper.h"
+#include <locale.h>
 
 #include "base.h"
+#include "cache.h"
 
 shock_config_t conf;
 
+
+/*
+    Thanks: http://www.programmingsimplified.com/c/source-code/c-program-convert-string-to-integer-without-using-atoi-function
+*/
+int toString(char a[]) {
+  int c, sign, offset, n;
+
+  if (a[0] == '-') {  // Handle negative integers
+    sign = -1;
+  }
+
+  if (sign == -1) {  // Set starting position to convert
+    offset = 1;
+  }
+  else {
+    offset = 0;
+  }
+
+  n = 0;
+
+  for (c = offset; a[c] != '\0'; c++) {
+    n = n * 10 + a[c] - '0';
+  }
+
+  if (sign == -1) {
+    n = -n;
+  }
+
+  return n;
+}
+
 void processRequest(SOCKET sock) {
-    char buffer[2048];
+    char buffer[REQUEST_MAX];
     recv(sock, &buffer, sizeof(buffer), 0);
     shock_request_t request;
     //Parse and validate request
@@ -29,8 +62,17 @@ void processRequest(SOCKET sock) {
     }
     char filename[FILENAME_MAX] = "";
     sprintf(filename, "%s%s", conf.root, route);
-
-    shock_serve_file(sock, filename);
+    if (conf.etagCache == 1 && request.etag[0] != 0) {
+        char *ptr;
+        time_t res = strtol(request.etag, &ptr, 10);
+        if (shock_cache_compare(filename, res) == 1) {
+            shock_response_notmodified(sock);
+        } else {
+        shock_serve_file(sock, filename);
+        }
+    } else {
+        shock_serve_file(sock, filename);
+    }
 
     closesocket(sock);
 }
@@ -56,6 +98,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    //setlocale(LC_ALL, "");
+
 
     //IPaddress ip;
 
@@ -70,6 +114,7 @@ int main(int argc, char* argv[]) {
     printf("[Config] Port: %d\n", conf.port);
     printf("[Config] Server Root: %s\n", conf.root);
     printf("[Config] ClearLogs: %d\n", conf.clearLogs);
+    printf("[Config] ETag Cache: %d\n", conf.etagCache);
 
 
     printf("\nResolving IP...\n\n");

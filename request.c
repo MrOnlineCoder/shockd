@@ -1,6 +1,7 @@
 #include "request.h"
 #include <stdio.h>
 #include <string.h>
+#include "server_defines.h"
 
 int isspace(char c) {
     if (c == ' ') {
@@ -12,15 +13,25 @@ int isspace(char c) {
 
 int shock_parse_request(shock_request_t* req, char* reqBuffer, size_t buffSize)
 {
-    char firstline[1024];
+    char currentLine[1024] = "";
+    int parsedFirstLine = 0;
+    int lineChar = 0; //Counter for currentLine
     for(int i=0;i<buffSize;i++) {
         if (reqBuffer[i]!='\n') {
-            firstline[i] = reqBuffer[i];
-        } else {
-            int errorCode = shock_parse_request_firstline(req, &firstline, strlen(firstline));
-            if (errorCode == -1) return -1;
-            break;
+            currentLine[lineChar] = reqBuffer[i];
+            lineChar++;
+            continue;
         }
+        if (parsedFirstLine == 0) {
+            parsedFirstLine = 1;
+            int errorCode = shock_parse_request_firstline(req, &currentLine, strlen(currentLine));
+            if (errorCode == -1) return -1;
+            continue;
+        }
+        int headerCode = shock_parse_request_header(req, &currentLine, strlen(currentLine));
+        if (headerCode == 1) printf("Parsing done.\n");
+        memset(currentLine, 0, sizeof(currentLine));
+        lineChar=0;
     }
 
     return 0;
@@ -29,7 +40,7 @@ int shock_parse_request(shock_request_t* req, char* reqBuffer, size_t buffSize)
 int shock_parse_request_firstline(shock_request_t* req, char* firstline, size_t lineSize)
 {
     char method[32] = " ";
-    char path[1024] = " ";
+    char path[ROUTE_MAX] = " ";
     char version[32] = " ";
 
     int i = 0; // this is total counter for line
@@ -110,3 +121,45 @@ int shock_parse_request_firstline(shock_request_t* req, char* firstline, size_t 
 
     return 0;
 }
+
+int shock_parse_request_header(shock_request_t* req, char* line, size_t lineSize)
+{
+    //
+    // YES! It is awful hard-coded check! If you have an idea how to implement this better, create a pull request
+    //
+
+    char token[256] = "";
+    int j = 0;
+    int phase = 0;
+    shock_header_t header;
+    for (int i=0;i<lineSize;i++) {
+        if (isspace(line[i]) == 1) {
+            continue;
+        }
+        if (line[i]==':' && phase == 0) {
+            strcpy(header.name, token);
+            memset(token, 0, sizeof(token));
+            phase = 1;
+            j = 0;
+            continue;
+        }
+
+        token[j] = line[i];
+        j++;
+    }
+    strcpy(header.value, token);
+
+    if (strcasecmp(header.name, "If-None-Match") == 0) {
+        strcpy(req->etag, header.value);
+        return 0;
+    }
+
+    if (strcasecmp(header.name, "User-Agent") == 0) {
+        strcpy(req->agent, header.value);
+        return 0;
+    }
+
+    //printf("[Request] Warning: unsupported header: %s\n", header.name);
+    return 0;
+}
+

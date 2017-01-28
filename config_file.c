@@ -14,7 +14,7 @@ int shock_parse_config(shock_config_t* conf, char* filename)
 
     size_t len = 0;
     int read = 0;
-    char line[256];
+    char line[512];
     int lineNum = 1;
 
     while (fgets (line, sizeof(line), fp ) != NULL ) {
@@ -104,6 +104,17 @@ int shock_parse_config_token(shock_config_t* conf, shock_config_keypair_t entry)
             conf->clearLogs = 1;
         } else if(entry.val[0] == '0') {
             conf->clearLogs = 0;
+        } else {
+            printf("Config Error: Invalid value for %s option. \n", entry.name);
+        }
+        return;
+    }
+
+    if (strcasecmp(entry.name, "ETagCache") == 0) {
+        if(entry.val[0] == '1') {
+            conf->etagCache = 1;
+        } else if(entry.val[0] == '0') {
+            conf->etagCache = 0;
         } else {
             printf("Config Error: Invalid value for %s option. \n", entry.name);
         }

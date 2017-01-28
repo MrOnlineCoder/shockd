@@ -1,7 +1,10 @@
 #ifndef SHOCK_DEFINES_H
 #define SHOCK_DEFINES_H
 
-#define SERVER_STRING "ShockDaemon/0.9.5"
+#define SERVER_STRING "ShockDaemon/0.9.6"
 #define ERROR_DELAY 2500
+#define REQUEST_MAX 3072
+#define ROUTE_MAX 1024
+#define HEADER_MAX 512
 
 #endif // SHOCK_DEFINES_H

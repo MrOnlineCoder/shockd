@@ -7,11 +7,13 @@
 #define SHOCK_DEFAULT_PORT 80
 #define SHOCK_DEFAULT_ROOT "htdocs"
 #define SHOCK_DEAFULT_CLEARLOGS 0
+#define SHOCK_DEAFULT_ETAGCACHE 1
 
 typedef struct {
     uint16_t port;
     char root[FILENAME_MAX];
     int clearLogs;
+    int etagCache;
 } shock_config_t;
 
 typedef struct {

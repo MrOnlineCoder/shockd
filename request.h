@@ -1,6 +1,7 @@
 #ifndef SHOCK_REQUEST_H
 #define SHOCK_REQUEST_H
 #include <stddef.h>
+#include "server_defines.h"
 
 /*
  HTTP method constants
@@ -9,13 +10,26 @@
 #define HTTP_GET 0
 #define HTTP_POST 1
 
+#define HTTP_HEADER(x) char x[HEADER_MAX]
 
 typedef struct {
     int version; //Version of HTTP protocol (0 means HTTP/1.0, 1 means HTTP/1.1)
     int method; //HTTP method
     char route[2048]; // The route path (/example/route)
     char errorMsg[256]; // Error msg, it is contained in request (yea..)
+    //===
+    //Request headers
+    //===
+    HTTP_HEADER(etag);
+    HTTP_HEADER(host);
+    HTTP_HEADER(agent);
+    HTTP_HEADER(accept);
 } shock_request_t;
+
+typedef struct {
+    char name[256];
+    char value[512];
+} shock_header_t;
 
 /** \brief Parses HTTP request from buffer and updates the shock_request_t
  *
@@ -36,6 +50,17 @@ typedef struct {
  *
  */
 int shock_parse_request_firstline(shock_request_t* req, char* firstline, size_t lineSize);
+
+/** \brief Parses header line of HTTP request
+ *
+ * \param req is shock_request_t sturct pointer
+ * \param line is the line to be parsed
+ * \param lineSize is size of line
+ * \return 0 on success, -1 on error, 1 when all headers are parsed
+ *
+ */
+int shock_parse_request_header(shock_request_t* req, char* line, size_t lineSize);
+
 
 
 
