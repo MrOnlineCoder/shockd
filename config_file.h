@@ -8,12 +8,14 @@
 #define SHOCK_DEFAULT_ROOT "htdocs"
 #define SHOCK_DEAFULT_CLEARLOGS 0
 #define SHOCK_DEAFULT_ETAGCACHE 1
+#define SHOCK_DEFAULT_LOG "shockd.log"
 
 typedef struct {
     uint16_t port;
     char root[FILENAME_MAX];
     int clearLogs;
     int etagCache;
+    char logFile[FILENAME_MAX];
 } shock_config_t;
 
 typedef struct {

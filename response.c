@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "base.h"
+#include "log.h"
 
 char* shock_date_now() {
   char buf[256];
@@ -41,6 +42,7 @@ void shock_serve_file(SOCKET sock, char* filename)
         buflen = fread(buf, 1, sizeof(buf), fp);
         if (buflen < 1) {
             if (!feof(fp)) {
+                shock_log(SHOCK_ERROR, "Failed to read %s file", filename);
                 printf("Internal Server Error: An error occured while reading file: %s \n", filename);
                 shock_error_internal(sock, "Failed to read data from requested file!");
                 break;

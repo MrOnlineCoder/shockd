@@ -12,6 +12,11 @@
 
 #define HTTP_HEADER(x) char x[HEADER_MAX]
 
+static char* httpMethods[] = {
+    "GET",
+    "POST"
+};
+
 typedef struct {
     int version; //Version of HTTP protocol (0 means HTTP/1.0, 1 means HTTP/1.1)
     int method; //HTTP method

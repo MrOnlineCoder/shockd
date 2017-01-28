@@ -9,9 +9,13 @@ Features
 
 * Serves HTML, CSS, JS, images, executables or any other files
 
+* Logs all requests and errors to file
+
 * Multi-threading (every new connection is processed in new thread)
 
-* It is fast enough for home usage :D (but not as nginx for example)
+* HTTP ETag cache support
+
+* It is fast enough for home usage :D
 
 Building
 --------
@@ -49,11 +53,11 @@ TODO
 
 * POST body parser
 
-* Add cache support
+* ~~Add cache support~~
 
 * Simple module system?
 
-* Logging to files
+* ~~Logging to files~~
 
 How server handles HTTP request
 -------------------------------

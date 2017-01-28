@@ -4,7 +4,7 @@ CFLAGS=-std=c99 -o shockd -w
 WIN32_LIBS=-lws2_32
 LINUX_LIBS=-pthread
 
-SRC=main.c request.c response.c error.c config_file.c
+SRC=main.c request.c response.c error.c config_file.c cache.c log.c
 
 all:
 	@echo "Use make win32 to build shockd for Windows"

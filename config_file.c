@@ -2,10 +2,13 @@
 #include "stdio.h"
 #include "stdlib.h"
 
+#include "log.h"
+
 int shock_parse_config(shock_config_t* conf, char* filename)
 {
     FILE *fp = fopen(filename, "r");
     if (!fp){
+        shock_log(SHOCK_ERROR, "Cannot open config file for reading!");
         printf("-------------------------------------------\n");
         printf("[Error] Cannot open config file for reading!\n");
         printf("-------------------------------------------\n");
@@ -40,6 +43,7 @@ int shock_parse_config(shock_config_t* conf, char* filename)
             //If it is line ending, then let's set entry value
             if (line[i] == '\n') {
                 if (phase == 0) {
+                    shock_log(SHOCK_ERROR, "Unexpected ending of line %d in config!", lineNum);
                     printf("Config Error: unexpected ending of line %d\n", lineNum);
                     break;
                 }
@@ -55,6 +59,7 @@ int shock_parse_config(shock_config_t* conf, char* filename)
             }
 
             if (phase == 1) {
+                shock_log(SHOCK_ERROR, "Unexpected colon in value on line %d in config!", lineNum);
                 printf("Config Warning: unexpected colon in value on line %d\n", lineNum);
             }
 
@@ -77,6 +82,7 @@ void shock_default_config(shock_config_t* conf)
     conf->port = SHOCK_DEFAULT_PORT;
     conf->clearLogs = SHOCK_DEAFULT_CLEARLOGS;
     strcpy(conf->root, SHOCK_DEFAULT_ROOT);
+    strcpy(conf->logFile, SHOCK_DEFAULT_LOG);
 }
 
 
@@ -89,6 +95,7 @@ int shock_parse_config_token(shock_config_t* conf, shock_config_keypair_t entry)
         conf->port = strtol(entry.val, NULL, 10);
         if (conf->port == 0) {
             conf->port = SHOCK_DEFAULT_PORT;
+            shock_log(SHOCK_ERROR, "Invalid value for %s option in config!", entry.name);
             printf("Config Error: Invalid value for %s option. \n", entry.name);
         }
         return;
@@ -106,6 +113,7 @@ int shock_parse_config_token(shock_config_t* conf, shock_config_keypair_t entry)
             conf->clearLogs = 0;
         } else {
             printf("Config Error: Invalid value for %s option. \n", entry.name);
+            shock_log(SHOCK_ERROR, "Invalid value for %s option in config!", entry.name);
         }
         return;
     }
@@ -117,9 +125,16 @@ int shock_parse_config_token(shock_config_t* conf, shock_config_keypair_t entry)
             conf->etagCache = 0;
         } else {
             printf("Config Error: Invalid value for %s option. \n", entry.name);
+            shock_log(SHOCK_ERROR, "Invalid value for %s option in config!", entry.name);
         }
         return;
     }
 
+    if (strcasecmp(entry.name, "LogFile") == 0) {
+        strncpy(conf->logFile, entry.val, sizeof(conf->logFile));
+        return;
+    }
+
+    shock_log(SHOCK_ERROR, "Unknown config option: %s", entry.name);
     printf("Config Error: Unknown option %s\n", entry.name);
 }
