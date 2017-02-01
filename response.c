@@ -7,7 +7,7 @@
 #include "log.h"
 
 char* shock_date_now() {
-  char buf[256];
+  char *buf = malloc(128);
   time_t now = time(0);
   struct tm tm = *gmtime(&now);
   strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tm);
@@ -34,7 +34,8 @@ void shock_serve_file(SOCKET sock, char* filename)
 
     shock_send_responseline(sock, 200, "OK", 1);
     shock_default_headers(sock);
-    shock_response_send_header(sock, "Etag", shock_cache_get(filename));
+    char* etag = shock_cache_get(filename);
+    shock_response_send_header(sock, "Etag", etag);
     shock_response_end_headers(sock);
     long buflen;
     char buf[2048];
@@ -52,6 +53,7 @@ void shock_serve_file(SOCKET sock, char* filename)
         send(sock, buf, buflen, 0);
     }
     fclose(fp);
+    free(etag);
 }
 
 void shock_response_end_headers(SOCKET sock)
@@ -64,8 +66,10 @@ void shock_response_end_headers(SOCKET sock)
 
 void shock_default_headers(SOCKET sock)
 {
-    shock_response_send_header(sock, "Date", shock_date_now());
+    char* date= shock_date_now();
+    shock_response_send_header(sock, "Date", date);
     shock_response_send_header(sock, "Server", SERVER_STRING);
+    free(date);
 }
 
 
