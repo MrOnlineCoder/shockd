@@ -16,14 +16,14 @@ char* log_levels[] = {
 
 FILE* logFile;
 int logged = 0;
+char* buf;
 
 char* shock_format_time()
 {
     time_t t = time(NULL);
     struct tm tm = *gmtime(&t);
-    char buf[128] = "";
     sprintf(buf, "%d.%d.%d %d:%d:%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
-    return strdup(buf);
+    return buf;
 }
 
 int shock_log_init(shock_config_t* conf)
@@ -32,6 +32,8 @@ int shock_log_init(shock_config_t* conf)
     if (!logFile) {
         return -1;
     }
+    buf = malloc(128);
+    if (!buf) return -1;
     return 0;
 }
 
