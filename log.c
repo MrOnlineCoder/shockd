@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "config_file.h"
 #include <stdarg.h>
+#include <assert.h>
 #include "request.h"
 #include "log.h"
 #include "time.h"
@@ -14,16 +15,26 @@ char* log_levels[] = {
     "Error",
 };
 
-FILE* logFile;
+FILE* logFile = 0;
 int logged = 0;
 
-char* shock_format_time()
-{
+char* shock_format_time() {
+    time_t rawtime;
+    time(&rawtime);
+    return ctime(&rawtime);
+}
+
+static void shock_logprint_time() {
+    assert(logFile != 0);
     time_t t = time(NULL);
     struct tm tm = *gmtime(&t);
-    char buf[128] = "";
-    sprintf(buf, "%d.%d.%d %d:%d:%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
-    return strdup(buf);
+    fprintf(logFile, "%02d.%02d.%04d %02d:%02d:%02d - "
+            , tm.tm_mday
+            , tm.tm_mon  + 1
+            , tm.tm_year + 1900
+            , tm.tm_hour
+            , tm.tm_min
+            , tm.tm_sec);
 }
 
 int shock_log_init(shock_config_t* conf)
@@ -38,7 +49,8 @@ int shock_log_init(shock_config_t* conf)
 void shock_log(int level, char* format, ...)
 {
     logged++;
-    fprintf(logFile, "%s: [%s] ", shock_format_time(), log_levels[level]);
+    shock_logprint_time();
+    fprintf(logFile, "[%s] ", log_levels[level]);
     va_list args;
     va_start (args, format);
     vfprintf (logFile, format, args);
@@ -58,18 +70,13 @@ void shock_log_raw(char* format, ...)
     va_end (args);
 }
 
-
-
 void shock_log_access(shock_request_t* req)
 {
     logged++;
-    fprintf(logFile, "%s: %s %s HTTP/1.%d (%s) \n", shock_format_time(), httpMethods[req->method], req->route, req->version, req->agent);
+    shock_logprint_time();
+    fprintf(logFile, "%s %s HTTP/1.%d (%s) \n", httpMethods[req->method], req->route, req->version, req->agent);
     if (logged == MAX_LOGS) {
         fflush(logFile);
         logged = 0;
     }
 }
-
-
-
-
