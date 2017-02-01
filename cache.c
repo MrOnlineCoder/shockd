@@ -12,7 +12,7 @@ time_t shock_cache_getlm(char* filename)
 char* shock_cache_get(char* filename)
 {
     time_t time;
-    char buf[256];
+    char* buf = malloc(256);
     /*
     //If cache entry was found, then return it
     for (int i=0;i<cacheSize;i++) {
@@ -21,8 +21,7 @@ char* shock_cache_get(char* filename)
             return buf;
         }
     }
-    */
-    //If not, add it and return the value;
+    //If not, add it and return the value;*/
     time = shock_cache_getlm(filename);
     sprintf(buf, "%d", time);
     return buf;
