@@ -6,6 +6,7 @@
 #include "log.h"
 #include "time.h"
 
+//This constant defines maximum log calls in i/o queue. When there are more that MAX_LOGS calls, fflush() called
 #define MAX_LOGS 16
 
 char* log_levels[] = {

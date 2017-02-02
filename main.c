@@ -13,37 +13,6 @@
 
 shock_config_t conf;
 
-
-/*
-    Thanks: http://www.programmingsimplified.com/c/source-code/c-program-convert-string-to-integer-without-using-atoi-function
-*/
-int toString(char a[]) {
-  int c, sign, offset, n;
-
-  if (a[0] == '-') {  // Handle negative integers
-    sign = -1;
-  }
-
-  if (sign == -1) {  // Set starting position to convert
-    offset = 1;
-  }
-  else {
-    offset = 0;
-  }
-
-  n = 0;
-
-  for (c = offset; a[c] != '\0'; c++) {
-    n = n * 10 + a[c] - '0';
-  }
-
-  if (sign == -1) {
-    n = -n;
-  }
-
-  return n;
-}
-
 void processRequest(SOCKET sock) {
     char buffer[REQUEST_MAX];
     recv(sock, &buffer, sizeof(buffer), 0);
@@ -160,6 +129,7 @@ int main(int argc, char* argv[]) {
     SOCKET client;
     struct sockaddr_in clientIP;
     size_t c = sizeof(struct sockaddr_in);
+
 
     shock_log_raw("-----------------------------------------------\n\n");
     shock_log_raw("NEW SERVER SESSION STARTED AT %s\n", shock_format_time());

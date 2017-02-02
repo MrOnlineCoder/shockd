@@ -9,6 +9,7 @@
 
 #define HTTP_GET 0
 #define HTTP_POST 1
+#include "hashmap.h"
 
 #define HTTP_HEADER(x) char x[HEADER_MAX]
 
@@ -22,6 +23,7 @@ typedef struct {
     int method; //HTTP method
     char route[2048]; // The route path (/example/route)
     char errorMsg[256]; // Error msg, it is contained in request (yea..)
+    shock_hashmap_t body; // This is used for both GET and POST requests
     //===
     //Request headers
     //===

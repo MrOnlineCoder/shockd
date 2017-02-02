@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "server_defines.h"
+#include "log.h"
 
 int isspace(char c) {
     if (c == ' ') {
@@ -16,6 +17,11 @@ int shock_parse_request(shock_request_t* req, char* reqBuffer, size_t buffSize)
     char currentLine[1024] = "";
     int parsedFirstLine = 0;
     int lineChar = 0; //Counter for currentLine
+
+
+    //Some default values
+    strcpy(req->agent, "N/A");
+
     for(int i=0;i<buffSize;i++) {
         if (reqBuffer[i]!='\n') {
             currentLine[lineChar] = reqBuffer[i];
@@ -62,12 +68,25 @@ int shock_parse_request_firstline(shock_request_t* req, char* firstline, size_t 
     j=0;
     i++;
 
+
     //Parse route itself
     while(isspace(firstline[i]) == 0 && i < lineSize-1) {
         if (j == sizeof(path)-1) {
-            strcpy(req->errorMsg, "Too long URL.");
+            strcpy(req->errorMsg, "Requested URL is too long.");
             return -1;
         }
+
+        //Issue: #5 (Prevents using /.. in path to serve files outside ServerRoot)
+        if (firstline[i]=='/') {
+            if (i+2<lineSize-1) {
+                if (firstline[i+1] == '.' && firstline[i+2] == '.') {
+                    shock_log(SHOCK_WARNING, "Request denied: using /.. in URL is forbidden");
+                    strcpy(req->errorMsg, "Using /.. in URL is forbidden");
+                    return -1;
+                }
+            }
+        }
+
         path[j] = firstline[i];
         j++;
         i++;
