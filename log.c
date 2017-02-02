@@ -41,6 +41,15 @@ static void shock_logprint_time() {
 
 int shock_log_init(shock_config_t* conf)
 {
+    //Config: ClearLogs
+    if (conf->clearLogs == 1) {
+        logFile = fopen (conf->logFile,"w");
+        if (!logFile) {
+            return -1;
+        }
+        fclose(logFile);
+    }
+
     logFile = fopen (conf->logFile,"a");
     if (!logFile) {
         return -1;

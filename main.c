@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
     struct sockaddr_in clientIP;
     size_t c = sizeof(struct sockaddr_in);
 
-    shock_log_raw("-----------------------------------------------\n");
+    shock_log_raw("-----------------------------------------------\n\n");
     shock_log_raw("NEW SERVER SESSION STARTED AT %s\n", shock_format_time());
     shock_log_raw("-----------------------------------------------\n");
     shock_log(SHOCK_INFO, "Server started!");
