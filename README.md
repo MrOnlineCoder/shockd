@@ -66,3 +66,11 @@ When incoming connection is received on TCP socket, server tries to create new t
 
 It creates empty **shock_request_t** struct object that will represent the request itself. Then calls parser to fill the request (function **shock_parse_request in request.c**). Then, server tries to send file requested by browser chunk-by-chunk over TCP and then closes the connection
 (function **shock_serve_file in response.c**)
+
+Contributing
+------------
+If you found a bug, security caveat or want to request a feature - **create an issue**
+
+If you want to improve code, close existing issues - **create a pull request**
+
+Code must be working, cross-platform and clean.
